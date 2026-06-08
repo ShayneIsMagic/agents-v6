@@ -1,9 +1,8 @@
 # AGENTS Guidelines — App (Monorepo)
 
-> **Stack:** React frontend + Flask backend — **full-stack application** only.  
-> **Do not use this file for:** static HTML/CSS/JS websites → use [`AGENTS-static.md`](./AGENTS-static.md) only.
+> **Stack:** React frontend + Flask backend
 
-Guidelines for full-stack **application** work when frontend and backend live in **one repository**, or as an index when using the split app template files. This is not a plain HTML build guide.
+Guidelines for full-stack application work when frontend and backend live in **one repository**, or as an index when using the split template files.
 
 **How to use this template:** Start from the structure below, then remove or skip sections that do not apply. Do not invent alternate conventions when a section still applies.
 
@@ -11,21 +10,13 @@ Guidelines for full-stack **application** work when frontend and backend live in
 
 ## File Index
 
-### App guidelines (React + Flask) — use these for applications
-
 | File | Stack | Use when |
 |---|---|---|
-| `AGENTS-frontend.md` | React · SCSS · npm | Frontend app repo, or FE work in a monorepo |
-| `AGENTS-backend.md` | Flask · Postgres · Pipenv | Backend app repo, or BE work in a monorepo |
+| `AGENTS-frontend.md` | React · SCSS · npm | Frontend repo, or FE work in a monorepo |
+| `AGENTS-backend.md` | Flask · Postgres · Pipenv | Backend repo, or BE work in a monorepo |
 | `AGENTS-app.md` | Both (index) | Monorepo — read this index, then both files above |
 
-### Static guidelines — separate from app work
-
-| File | Stack | Use when |
-|---|---|---|
-| `AGENTS-static.md` | HTML · CSS · JS only | Marketing sites, landing pages, static tools — **not** React or Flask |
-
-**Naming convention:** `AGENTS-{scope}.md`. App files and static files are intentionally separate — never merge static HTML build rules into app frontend or backend files.
+**Naming convention:** `AGENTS-{scope}.md`
 
 ---
 
