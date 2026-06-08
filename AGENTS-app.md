@@ -1,6 +1,7 @@
 # AGENTS Guidelines — App (Frontend + Backend)
 
-This repository contains two applications:
+This template may be a **monorepo** (`/frontend` and `/backend` in one repository) or **separate frontend and backend repositories**. In both cases, frontend and backend are separate builds with separate dev servers.
+
 - **Frontend**: React, HTML, CSS, SCSS (`/frontend`)
 - **Backend**: Python Flask, Postgres, SQLAlchemy, Marshmallow (`/backend`)
 
@@ -34,7 +35,7 @@ These apply to all agents, regardless of stack.
 - When creating new objects or components, review similar existing ones for conventions before starting.
 
 ### Security
-- Use HTTPS for all links and resources. No mixed content.
+- Use HTTPS for production and external links. No mixed content. Local dev servers on `localhost` may use HTTP.
 - Sanitize and validate all user input server-side. Never trust client-side validation alone.
 - Use `rel="noopener noreferrer"` on all `target="_blank"` links.
 - In React, use component event handlers (`onClick`, etc.) — do not use HTML `onclick` attributes or `dangerouslySetInnerHTML` with inline handlers.
@@ -46,6 +47,7 @@ These apply to all agents, regardless of stack.
 - Add to existing docs when new guidance is needed rather than creating new files.
 - Do not duplicate rules across README, `AGENTS-app.md`, and other files — one source of truth.
 - When in doubt: fewer docs, more focused content.
+- Required exceptions: `API_DOCUMENTATION.md` and the Postman collection in `postman/` — update both when endpoints change.
 
 ### Git
 - Branch from `main` using the convention `<initials>/<feature-name>` (e.g. `sm/task-filter`).
@@ -69,28 +71,30 @@ These apply to all agents, regardless of stack.
 
 ## API Integration (Frontend ↔ Backend)
 
-Frontend and backend are **separate builds** with separate dev servers. In most setups they are also **separate repositories**. They integrate only through a documented HTTP API.
+Frontend and backend integrate only through a documented HTTP API.
 
 ### Source of truth
-- **Backend** owns `API_DOCUMENTATION.md` — every endpoint, request/response shape, status code, and auth requirement lives here.
+- **Backend** owns `API_DOCUMENTATION.md` (at `/backend/API_DOCUMENTATION.md` in a monorepo, or in the backend repository when split) — every endpoint, request/response shape, status code, and auth requirement lives here.
 - **Backend** maintains the Postman collection in `postman/` — keep it in sync with `API_DOCUMENTATION.md`.
-- **Frontend** reads `API_DOCUMENTATION.md` **before** implementing or changing any API call.
+- **Frontend** reads `API_DOCUMENTATION.md` from the backend **before** implementing or changing any API call.
 
 ### Creating or changing an API
-1. **Backend first:** Define or update the endpoint in `API_DOCUMENTATION.md` before or alongside implementation.
+1. **Backend first:** Define or update the endpoint in `API_DOCUMENTATION.md` **before** implementation.
 2. Implement controller + route using `BaseController` / `BaseRoute` patterns.
 3. Register the route in `create_app.py`.
 4. Add Alembic migration if the schema changed.
 5. Test with Postman; update the Postman collection.
 6. **Frontend second:** Implement the UI using `useAPICall` / `useTriggeredAPICall` and `src/lib/apiCall.js`, matching the documented contract exactly.
 7. Configure the frontend base URL in `environmentConfig.js` — never hardcode backend URLs in components.
+8. Run both dev servers and verify the feature in the browser.
 
 ### Contract rules
-- Response shapes documented in `API_DOCUMENTATION.md` must match what the backend returns.
-- Use consistent error format across endpoints (status code + message body).
+- Documented request/response shapes in `API_DOCUMENTATION.md` must match what the backend returns (Marshmallow-serialized output).
+- Match the error format used by existing endpoints — see `API_DOCUMENTATION.md` and existing Task/Project implementations.
+- Auth for each endpoint is documented in `API_DOCUMENTATION.md`. Frontend auth calls use `src/services/authServices.js`.
 - Frontend must handle documented error cases (401, 403, 404, validation errors) with toast notifications, not `alert()`.
-- CORS on the backend must allow the frontend dev-server origin during development.
-- Coordinate breaking API changes with the user before merging — both repos may need updates.
+- Configure CORS in `config/config.py` to allow the frontend dev-server origin during development.
+- Coordinate breaking API changes with the user before merging — both sides may need updates.
 
 ---
 
@@ -98,7 +102,7 @@ Frontend and backend are **separate builds** with separate dev servers. In most 
 
 All paths below are relative to **`/frontend`**.
 
-## Commands
+### Commands
 
 ```bash
 # Check package.json "scripts" — use the standard dev script for this project:
@@ -113,11 +117,9 @@ npm run dev        # common for Vite and similar tooling
 ```
 **Do not run `npm run build` inside an agent session.**
 
----
+### Coding Conventions
 
-## Coding Conventions
-
-### Components
+#### Components
 - **Before creating a new component**, search `src/components/` thoroughly — especially:
   - `core/` — Avatar, Badge, Button, ColorPicker, ComboBox, DataTable, KanbanBoard, MarkdownEditor/Viewer, PaginationButtons, ThemeSwitcher
   - `input/` — Email, FormFieldPassword, FormFieldSelect, FormFieldTags, FormFieldText, QuillEditor, SearchInput, TextField
@@ -129,7 +131,7 @@ npm run dev        # common for Vite and similar tooling
 - Check `src/hooks/` before writing new hooks — useAPICall, useTriggeredAPICall, useAbortSignal, useClickOutside, useDataColumns, useDebounce, useDeepEffect, useDelayedLoading, useDynamicFilter, usePagination already exist.
 - **Page components** live in `src/components/pages/` and use the `*Page` suffix (e.g. `ProjectListPage.jsx`, `ProjectDetailPage.jsx`). Shared forms use the `*Form` suffix. `Home.jsx` and `NoMatch.jsx` at the `pages/` root are established exceptions.
 
-### Styles
+#### Styles
 - **Before writing new styles**, check:
   - `src/styles/abstracts/` for variables, mixins, and theme definitions (light/dark)
   - `src/styles/components/` for existing component-level SCSS
@@ -143,19 +145,18 @@ npm run dev        # common for Vite and similar tooling
 - Review `ProjectListPage.jsx` and `ProjectDetailPage.jsx` as reference before adding new page-level styles.
 - `src/deleted-styles/` contains legacy SCSS kept for reference — do not import or reuse these files.
 
-### Patterns
+#### Patterns
 - Use `src/hooks/fetch-hooks/useAPICall` and `useTriggeredAPICall` for API calls — don't roll custom fetch logic.
 - Use `src/lib/apiCall.js` as the base API implementation.
+- `src/services/api.js` and `src/services/authServices.js` hold established service helpers — extend these for shared API and auth logic; do not add parallel fetch implementations.
 - Use `src/util/toastNotifications.jsx` for user feedback — don't use `alert()`.
 - Use `src/helpers/checkAccess.js` for access control checks.
 
-### State management
-- Application state lives in React context (`src/context/`) and component-level hooks — do not introduce `localStorage`, `sessionStorage`, or additional global state stores without an explicit discussion with the user.
+#### State management
+- Application state lives in React context (`src/context/`) and component-level hooks — do not introduce `localStorage`, `sessionStorage`, Redux, or other global state stores without an explicit discussion with the user. `src/reducer/` is reserved for future use — do not add Redux.
 - If persistent client-side state is genuinely needed for a feature, document where it lives, what key it uses, and how it is cleared — before implementing.
 
----
-
-## Project Structure
+### Project Structure
 
 ```
 src/
@@ -242,9 +243,7 @@ src/
 └── environmentConfig.js     # API base URL and environment configuration
 ```
 
----
-
-## QA Checklist
+### QA Checklist
 
 **Code review — run before marking anything done:**
 - [ ] No hardcoded colors — all values use CSS variables
@@ -277,9 +276,7 @@ src/
 - [ ] Error states handled — test with network throttled or disconnected
 - [ ] Toast notifications fire correctly for success and error states
 
----
-
-## Anti-Patterns
+### Anti-Patterns
 
 | Avoid | Do instead |
 |---|---|
@@ -298,13 +295,12 @@ src/
 | Skipping `ProjectListPage.jsx` / `ProjectDetailPage.jsx` as style reference | Always review before new page styles |
 
 ---
----
 
 ## Backend (Flask / Postgres)
 
 All paths below are relative to **`/backend`**.
 
-## Commands
+### Commands
 
 ```bash
 pipenv shell                    # always activate the Python shell first
@@ -319,30 +315,27 @@ python app.py demo-data         # start and seed demo data
 python app.py import            # import data from Taskwize v1 to v2
 ```
 
----
+### Coding Conventions
 
-## Coding Conventions
-
-### Controllers & Routes
+#### Controllers & Routes
 - **New controllers** must inherit from `BaseController` — see `src/controllers/base_controller.py`.
 - **New routes** must inherit from `BaseRoute` — see `src/routes/base_routes.py`.
 - Before writing a new controller or route, review the existing Task and Project implementations as reference — they demonstrate the correct inheritance and patterns.
 - Do not write standalone controller or route logic. Inheriting from the base classes avoids duplicating common functionality.
 
-### Models
+#### Models
 - All models use SQLAlchemy ORM. Never write raw SQL.
 - Review existing models before adding new fields or relationships — conventions for naming, relationships, and nullable fields are established.
 
-### Utilities
+#### Utilities
 - Check all files in `src/util/` before writing any new helper function. The utility coverage is broad — duplication is likely if you skip this step.
 
-### API documentation
-- Every new or modified endpoint must be documented in `API_DOCUMENTATION.md` before the task is marked done.
+#### API documentation
+- Use Marshmallow schemas for request/response serialization.
+- Every new or modified endpoint must be documented in `API_DOCUMENTATION.md` **before** the task is marked done. Document the serialized request/response shape.
 - Update the Postman collection in `postman/` to match.
 
----
-
-## Project Structure
+### Project Structure
 
 ```
 app.py                          # main Flask entry point with CLI commands
@@ -429,18 +422,14 @@ uploads/
 └── temp-downloads/             # temporary file storage
 ```
 
----
-
-## Database Migrations
+### Database Migrations
 
 - Use Alembic for **all** schema changes. Never modify the database directly.
 - Create a migration file for every model change: `alembic revision --autogenerate -m "description"`
 - Run and verify migrations locally before marking a task complete.
 - Migration files live in `alembic/versions/`.
 
----
-
-## QA Checklist
+### QA Checklist
 
 **Architecture — verify before running:**
 - [ ] New controller inherits `BaseController`
@@ -469,10 +458,9 @@ uploads/
 **Documentation:**
 - [ ] `API_DOCUMENTATION.md` updated if any endpoints were added or modified
 - [ ] Postman collection updated to match
+- [ ] Both dev servers running — feature verified in the browser against the frontend
 
----
-
-## Anti-Patterns
+### Anti-Patterns
 
 | Avoid | Do instead |
 |---|---|
@@ -488,7 +476,6 @@ uploads/
 | Adding endpoints without updating docs | Update `API_DOCUMENTATION.md` and Postman |
 | Backend changes without frontend coordination | Document breaking changes; notify user |
 
----
 ---
 
 ## Skills & References
@@ -512,6 +499,6 @@ Skill paths follow the [rapid-build-websites](https://github.com/Dev-Pipeline-14
 
 ## Quick Reference
 
-Plan first (except direct fixes) · ask before installing · check existing code before creating · use the dev server only · check port and kill stale process before starting · branch `<initials>/<feature>` · **do not commit or push unless the user explicitly asks** · API docs are source of truth · backend + docs first, frontend second · **FE**: CSS variables always · `*Page` suffix for page components · check `core/`, `input/`, `hooks/`, `context/` before creating · state in React context not localStorage · useAPICall for fetch · toastNotifications not alert() · light + dark mode + mobile tested · no console errors in Chrome + Safari · **BE**: pipenv shell first · BaseController + BaseRoute always · SQLAlchemy not raw SQL · Alembic for all schema changes · test with demo-data + Postman · check logs/ · role/permission verified · API docs + Postman updated · load skill files before document or file tasks.
+Plan first (except direct fixes) · ask before installing · check existing code before creating · use the dev server only · check port and kill stale process before starting · branch `<initials>/<feature>` · **do not commit or push unless the user explicitly asks** · API docs are source of truth (`/backend/API_DOCUMENTATION.md`) · backend + docs before implementation, frontend second · verify in browser with both dev servers · **FE**: CSS variables always · `*Page` suffix · check `core/`, `input/`, `hooks/`, `context/` before creating · useAPICall / apiCall.js · extend `services/` not parallel fetch · authServices for auth · toastNotifications not alert() · light + dark mode + mobile tested · no console errors in Chrome + Safari · **BE**: pipenv shell first · BaseController + BaseRoute · Marshmallow serialization · SQLAlchemy not raw SQL · Alembic for schema · CORS in config/config.py · test with demo-data + Postman · check logs/ · role/permission verified · API docs + Postman updated before done · load skill files before document or file tasks.
 
 *When in doubt — ask the user, check existing code, read the API docs, and restart the dev server rather than debugging a stale state.*
