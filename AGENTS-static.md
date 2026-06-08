@@ -1,6 +1,9 @@
 # AGENTS Guidelines — Static Sites (HTML / CSS / JS)
 
-This document covers plain static websites built with HTML, CSS, and JavaScript — no React, no Flask. Read it in full before starting any work on a static site.
+> **Stack:** HTML · CSS · JavaScript only — **static websites**.  
+> **Do not use this file for:** React app frontend → [`AGENTS-frontend.md`](./AGENTS-frontend.md) · Flask app backend → [`AGENTS-backend.md`](./AGENTS-backend.md) · app monorepo → [`AGENTS-app.md`](./AGENTS-app.md).
+
+This document covers plain static websites built with HTML, CSS, and JavaScript — **no React, no Flask, no app API layer**. Read it in full before starting any work on a static site.
 
 **How to use this template:** Start from the structure and build order below, then remove or skip sections that do not apply to the current project (e.g. skip GTM/SEO depth if the site is internal-only). Do not invent alternate conventions when a section still applies.
 

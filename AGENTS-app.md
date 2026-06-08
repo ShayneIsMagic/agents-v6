@@ -1,6 +1,9 @@
 # AGENTS Guidelines — App (Monorepo)
 
-Guidelines for full-stack application work when frontend and backend live in **one repository**, or as an index when using the split template files.
+> **Stack:** React frontend + Flask backend — **full-stack application** only.  
+> **Do not use this file for:** static HTML/CSS/JS websites → use [`AGENTS-static.md`](./AGENTS-static.md) only.
+
+Guidelines for full-stack **application** work when frontend and backend live in **one repository**, or as an index when using the split app template files. This is not a plain HTML build guide.
 
 **How to use this template:** Start from the structure below, then remove or skip sections that do not apply. Do not invent alternate conventions when a section still applies.
 
@@ -8,14 +11,21 @@ Guidelines for full-stack application work when frontend and backend live in **o
 
 ## File Index
 
-| File | Use when |
-|---|---|
-| `AGENTS-app.md` | Monorepo — read this index, then both split files below |
-| `AGENTS-frontend.md` | Frontend-only repo, or frontend work in a monorepo |
-| `AGENTS-backend.md` | Backend-only repo, or backend work in a monorepo |
-| `AGENTS-static.md` | Static HTML/CSS/JS sites (no React, no Flask) |
+### App guidelines (React + Flask) — use these for applications
 
-**Naming convention:** `AGENTS-{scope}.md` — same pattern across all project types.
+| File | Stack | Use when |
+|---|---|---|
+| `AGENTS-frontend.md` | React · SCSS · npm | Frontend app repo, or FE work in a monorepo |
+| `AGENTS-backend.md` | Flask · Postgres · Pipenv | Backend app repo, or BE work in a monorepo |
+| `AGENTS-app.md` | Both (index) | Monorepo — read this index, then both files above |
+
+### Static guidelines — separate from app work
+
+| File | Stack | Use when |
+|---|---|---|
+| `AGENTS-static.md` | HTML · CSS · JS only | Marketing sites, landing pages, static tools — **not** React or Flask |
+
+**Naming convention:** `AGENTS-{scope}.md`. App files and static files are intentionally separate — never merge static HTML build rules into app frontend or backend files.
 
 ---
 

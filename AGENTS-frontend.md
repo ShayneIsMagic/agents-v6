@@ -1,6 +1,9 @@
 # AGENTS Guidelines — Frontend (React / SCSS)
 
-Guidelines for the React frontend repository. The backend is a **separate repo** — integration happens only through a documented HTTP API.
+> **Stack:** React · SCSS · npm — **app** frontend only.  
+> **Do not use this file for:** static HTML/CSS/JS websites → use [`AGENTS-static.md`](./AGENTS-static.md).
+
+Guidelines for the React frontend of a full-stack **application**. The backend is a **separate repo** — integration happens only through a documented HTTP API. This is not a plain HTML build guide.
 
 **How to use this template:** Start from the structure below, then remove or skip sections that do not apply to the current project. Do not invent alternate conventions when a section still applies.
 
